@@ -56,7 +56,7 @@ class AuthService{
                  res.status(400).json({ error: `ERROR:Wrong password, please try again!!` })
                  return
             }
-            const authToken=generateToken(isExistingUser.id,isExistingUser.email||'')
+            const authToken=generateToken(isExistingUser.id,isExistingUser.email||'',isExistingUser.isAdmin||false)
             logger.info(`user with ${email}, logged in succesfully`)
             res.status(200).json({message:'Login succesful',token:authToken})
             
