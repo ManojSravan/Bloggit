@@ -1,7 +1,7 @@
 interface IPost{
-    title:String,
-    content:String,
-    likeCount:Number,
+    title:string,
+    content:string,
+    likeCount?:Number,
     userId:Number,
     tags?:[],
     images?:[],

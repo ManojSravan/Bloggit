@@ -9,32 +9,39 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider = "sqlite"
+  url      = env("DATABASE_URL_test")
 }
 
 model user {
-  id        String     @id @default(uuid())
-  name      String?
-  email     String? @unique
-  password  String?
-  isAdmin   Boolean? @default(false)
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  posts     posts[]
-  likes     likes[]
-  comments  comments[]
-  replies   replies[]
+  id         String     @id @default(uuid())
+  name       String?
+  username   String?    @unique //unique name for users
+  bio        String? //user bio
+  avatar     String? //user avatar
+  coverImage String? //cover image for user profile
+  location   String? //loation for best recommendations for users
+  email      String?    @unique
+  password   String?
+  isAdmin    Boolean?   @default(false)
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  posts      posts[]
+  likes      likes[]
+  comments   comments[]
+  replies    replies[]
 
+  socialLinks socialLinks[]
+  tag         tag[]
 }
 
 model posts {
   id        String     @id @default(uuid())
   title     String?
   content   String?
-  likeCount Int @default(0)
+  likeCount Int        @default(0)
   userId    String
-  user      user      @relation(references: [id], fields: [userId],onDelete: Cascade)
+  user      user       @relation(references: [id], fields: [userId], onDelete: Cascade)
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
   tags      tag[]
@@ -47,11 +54,13 @@ model tag {
   id        String   @id @default(uuid())
   title     String?
   postId    String
-  post      posts   @relation(references: [id], fields: [postId],onDelete: Cascade)
+  userId    String?
+  user      user?    @relation(references: [id], fields: [userId],onDelete: Cascade)
+  post      posts    @relation(references: [id], fields: [postId], onDelete: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([postId])
+  @@index([postId,userId])
 }
 
 model images {
@@ -59,7 +68,7 @@ model images {
   src       String?
   alt       String?
   postId    String
-  post      posts     @relation(references: [id], fields: [postId],onDelete: Cascade)
+  post      posts      @relation(references: [id], fields: [postId], onDelete: Cascade)
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
   comments  comments[]
@@ -72,8 +81,8 @@ model likes {
   id        String    @id @default(uuid())
   likedBy   String
   postId    String?
-  post      posts?    @relation(references: [id], fields: [postId],onDelete: Cascade)
-  user      user     @relation(references: [id], fields: [likedBy],onDelete: Cascade)
+  post      posts?    @relation(references: [id], fields: [postId], onDelete: Cascade)
+  user      user      @relation(references: [id], fields: [likedBy], onDelete: Cascade)
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   replies   replies[]
@@ -87,29 +96,44 @@ model comments {
   commentedBy String
   postId      String
   attachments String?
-  images      images?   @relation(references: [id], fields: [attachments],onDelete: Cascade)
-  post        posts   @relation(references: [id], fields: [postId],onDelete: Cascade)
-  user        user     @relation(references: [id], fields: [commentedBy],onDelete: Cascade)
+  images      images?   @relation(references: [id], fields: [attachments], onDelete: Cascade)
+  post        posts     @relation(references: [id], fields: [postId], onDelete: Cascade)
+  user        user      @relation(references: [id], fields: [commentedBy], onDelete: Cascade)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   replies     replies[]
 
-  @@index([ postId, commentedBy,attachments])
+  @@index([postId, commentedBy, attachments])
 }
 
 model replies {
-  id          String    @id @default(uuid())
+  id          String   @id @default(uuid())
   content     String?
   commentId   String
   likeId      String?
   repliedBy   String
   attachments String?
-  images      images?   @relation(references: [id], fields: [attachments],onDelete: Cascade)
-  comments    comments @relation(references: [id], fields: [commentId],onDelete: Cascade)
-  likes       likes ?   @relation(references: [id], fields: [likeId],onDelete: Cascade)
-  user        user     @relation(references: [id], fields: [repliedBy],onDelete: Cascade)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  images      images?  @relation(references: [id], fields: [attachments], onDelete: Cascade)
+  comments    comments @relation(references: [id], fields: [commentId], onDelete: Cascade)
+  likes       likes?   @relation(references: [id], fields: [likeId], onDelete: Cascade)
+  user        user     @relation(references: [id], fields: [repliedBy], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  @@index([repliedBy, likeId, commentId,attachments])
+  @@index([repliedBy, likeId, commentId, attachments])
+}
+
+model socialLinks {
+  id        String  @id @default(uuid())
+  userId    String?
+  instagram String?
+  twitter   String?
+  linkedIn  String?
+  reddit    String?
+
+  user      user?    @relation(references: [id], fields: [userId],onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
 }

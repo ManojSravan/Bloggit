@@ -14,4 +14,12 @@ export interface IUserLogin{
     password:string
 }
 
- 
+export interface IUserProfile{
+    username:string,
+    bio:string,
+    avatar:string,
+    coverImage:string,
+    location:string,
+    socialLinks?:[],
+    tags?:[]
+}
